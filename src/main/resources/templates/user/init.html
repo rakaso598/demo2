@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원 ID찾기</title>
+</head>
+<body>
+</body>
+<script>
+  
+  function findingId() {
+    //바디안에 화면출력
+    const body = document.body;
+    body.innerHTML = `
+        <h1>아이디 찾기</h1>
+        <div>
+            <label for="tel">전화번호</label>
+            <input type="tel" id="tel" placeholder="전화번호 입력" maxlength="13" oninput="hypenTel(this)">
+            <button id="btnFindId">아이디 찾기</button>
+            <br>
+            <span>찾은 아이디 : </span><span id="foundId"></span>
+            <br>
+            <p id="error"></p>
+        </div>
+    `;
+    
+    //ID찾기 버튼
+    const btnFindId = document.getElementById('btnFindId')
+
+    btnFindId.addEventListener('click', function () {
+      console.log('ID찾기 버튼호출')
+      const tel = document.getElementById("tel").value;
+      if (tel.length != 13) {
+        error.textContent = '전화번호를 확인해주세요.';
+        foundId.textContent = ''; 
+        console.log("실패")
+        return;
+      } else {
+        error.textContent = ''; 
+        console.log(tel)
+
+        const fetchData = async () => {
+          try {
+            const tel = document.getElementById("tel").value;
+            const requestData = { 'phonenumber': tel };
+            // RequestData = { 'phonenumber' : 전화번호 }
+            const url = 'http://localhost:9090/findid'; // 주소
+
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+              },
+              body: JSON.stringify(requestData),
+            });
+
+            //응답
+            if (response.ok) {
+              const responseData = await response.json();
+              console.log('서버 응답 데이터:', responseData);
+              const successData = responseData.email
+              foundId.textContent = successData;
+            } else {
+              console.error('서버에서 오류 응답을 받았습니다.');
+              foundId.textContent = "실패"; 
+            }
+          } catch (error) {
+            console.error('요청 중 오류 발생:', error);
+            foundId.textContent = "실패"; 
+          }
+        };
+        fetchData();
+      }
+    });
+  }
+
+findingId();// 화면출력
+
+  // 전화번호 하이폰 자동생성
+  const hypenTel = (target) => {
+    target.value = target.value
+      .replace(/[^0-9]/g, '')
+      .replace(/^(\d{2,3})(\d{3,4})(\d{4})$/, `$1-$2-$3`);
+  }
+</script>
+
+</html>
